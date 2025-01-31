@@ -1,0 +1,157 @@
+<!-- 
+ ~ Copyright Fraunhofer Institute for Material Flow and Logistics
+ ~
+ ~ Licensed under the Apache License, Version 2.0 (the "License").
+ ~ For details on the licensing terms, see the LICENSE file.
+ ~ SPDX-License-Identifier: Apache-2.0
+-->
+<h1 class="font-semibold text-gray-700 pb-4">Farmer</h1>
+<div class="card">
+  <h1 class="text-lg font-semibold">Details</h1>
+</div>
+<div class="grid md:grid-cols-2 sm:grid-cols-1 mt-4 gap-4" *ngIf="farmer$ | async as farmer">
+  <div class="card">
+    <div class="grid grid-cols-1 md:grid-cols-2 mb-4">
+      <h1 class="text-lg font-semibold">General Information</h1>
+      <div class="mt-2 md:mt-0 md:text-end">
+        <p class="text-neutral-500 text-xs" *ngIf="farmer.employeeId">Local Farmer ID: {{ farmer.employeeId }}</p>
+        <p class="text-neutral-500 text-xs" *ngIf="farmer.personalId">Personal ID: {{ farmer.personalId }}</p>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 sm:grid-cols-1 md:space-x-4">
+      <mat-form-field appearance="outline">
+        <mat-label>First Name</mat-label>
+        <input matInput [(ngModel)]="farmer.firstName" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Last Name</mat-label>
+        <input matInput [(ngModel)]="farmer.lastName" />
+      </mat-form-field>
+    </div>
+
+    <mat-form-field class="w-full" appearance="outline">
+      <mat-label>Email</mat-label>
+      <input matInput [(ngModel)]="farmer.email" />
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="outline">
+      <mat-label>Phone Number</mat-label>
+      <input matInput [(ngModel)]="farmer.mobilePhoneNumber" />
+    </mat-form-field>
+
+    <div class="grid md:grid-cols-2 mt-4">
+      <span class="border-b-2 py-2 font-medium">Company</span>
+      <a
+        *ngIf="company$ | async as company"
+        class="py-2 border-b-2 text-secondary-500 cursor-pointer hover:underline"
+        routerLink="/companies/{{ this.authenticationService.getCurrentCompanyId() }}"
+      >
+        {{ company.name }}
+      </a>
+      <span class="py-2 font-medium md:border-none sm:border-b-2">Plot of Land</span>
+      <div>
+        <a
+          class="py-2 text-secondary-500 cursor-pointer hover:underline"
+          *ngFor="let plotOfLand of farmer?.plotsOfLand"
+          [routerLink]="['/pols', plotOfLand.id]"
+        >
+          {{ plotOfLand.description }}
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="card" *ngIf="farmer.address">
+    <h1 class="text-lg font-semibold mb-4">Address Information</h1>
+    <mat-form-field class="w-full" appearance="outline">
+      <mat-label>Street</mat-label>
+      <input matInput [(ngModel)]="farmer.address.street" />
+    </mat-form-field>
+
+    <div class="grid md:grid-cols-2 sm:grid-cols-1 md:space-x-4">
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>Postal Code</mat-label>
+        <input matInput [(ngModel)]="farmer.address.postalCode" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>City</mat-label>
+        <input matInput [(ngModel)]="farmer.address.city" />
+      </mat-form-field>
+    </div>
+
+    <div class="grid md:grid-cols-2 sm:grid-cols-1 md:space-x-4">
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>State</mat-label>
+        <input matInput [(ngModel)]="farmer.address.state" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Country</mat-label>
+        <input matInput [(ngModel)]="farmer.address.country" />
+      </mat-form-field>
+    </div>
+
+    <mat-form-field class="w-full" appearance="outline">
+      <mat-label>Additional Information</mat-label>
+      <input matInput [(ngModel)]="farmer.address.additionalInformation" />
+    </mat-form-field>
+
+    <div class="flex justify-center items-center">
+      <button mat-flat-button class="text-nowrap" (click)="updateFarmerData(farmer)">Update Farmer</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h1 class="text-lg font-semibold">Documents</h1>
+    @if (!farmer.documents || farmer.documents.length === 0) {
+      <p>No documents uploaded yet.</p>
+    }
+
+    @for (document of farmer.documents; track $index) {
+      <div class="flex w-full justify-between items-center border-b-2">
+        <div class="font-medium">
+          {{ document.description.length > 0 ? document.description : 'No custom description provided (ID: ' + document.id + ')' }}
+        </div>
+        <div class="text-neutral-500 flex items-center gap-2">
+          <a
+            [href]="MINIO_URL + document.documentRef"
+            target="_blank"
+            class="p-1 material-symbols-outlined hover:bg-gray-200 rounded-full cursor-pointer"
+            matTooltip="Download document"
+          >
+            <span class="material-symbols-outlined"> download </span>
+          </a>
+          <button
+            class="p-1 material-symbols-outlined hover:bg-red-200 rounded-full cursor-pointer"
+            (click)="deleteDocument(document)"
+            matTooltip="Delete document"
+          >
+            delete
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div>
+    <app-upload-form
+      [title]="'Upload Documents'"
+      [showDescriptionField]="true"
+      [showUploadedFiles]="false"
+      [informationText]="
+        'Upload relevant Documents or Certificates for a Farmer here (e.g. Fairtrade Certificate). This step is optional, documents can also be added later.'
+      "
+      [buttonText]="'Upload '"
+      [buttonTooltip]="'Uploads the document directly to the farmer'"
+      (uploadDocument)="submitFile({ fgFile: $event, farmerId: farmer.id })"
+    ></app-upload-form>
+  </div>
+</div>
+
+<div class="card mt-4">
+  <div class="inline-flex justify-end gap-4 w-full">
+    <button mat-button (click)="window.history.back()" class="font-medium">Back</button>
+  </div>
+</div>

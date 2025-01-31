@@ -1,0 +1,127 @@
+/*
+ * Copyright Fraunhofer Institute for Material Flow and Logistics
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License").
+ * For details on the licensing terms, see the LICENSE file.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@use '@angular/material' as mat;
+@use './styles/m3-theme.scss';
+
+@import 'material-symbols';
+
+@font-face {
+  font-display: swap;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 100;
+  src: url('assets/fonts/roboto-v30-latin-100.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 300;
+  src: url('assets/fonts/roboto-v30-latin-300.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: url('assets/fonts/roboto-v30-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  src: url('assets/fonts/roboto-v30-latin-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  src: url('assets/fonts/roboto-v30-latin-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-display: swap;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 900;
+  src: url('assets/fonts/roboto-v30-latin-900.woff2') format('woff2');
+}
+
+html {
+  // Apply the light theme by default
+  @include mat.core-theme(m3-theme.$light-theme);
+  @include mat.button-theme(m3-theme.$light-theme);
+  @include mat.system-level-colors(m3-theme.$light-theme);
+  @include mat.card-theme(m3-theme.$light-theme);
+  @include mat.checkbox-theme(m3-theme.$light-theme);
+  @include mat.dialog-theme(m3-theme.$light-theme);
+  @include mat.expansion-theme(m3-theme.$light-theme);
+  @include mat.form-field-theme(m3-theme.$light-theme);
+  @include mat.icon-theme(m3-theme.$light-theme);
+  @include mat.input-theme(m3-theme.$light-theme);
+  @include mat.list-theme(m3-theme.$light-theme);
+  @include mat.menu-theme(m3-theme.$light-theme);
+  @include mat.progress-bar-theme(m3-theme.$light-theme);
+  @include mat.progress-spinner-theme(m3-theme.$light-theme);
+  @include mat.radio-theme(m3-theme.$light-theme);
+  @include mat.select-theme(m3-theme.$light-theme);
+  @include mat.sidenav-theme(m3-theme.$light-theme);
+  @include mat.slider-theme(m3-theme.$light-theme);
+  @include mat.snack-bar-theme(m3-theme.$light-theme);
+  @include mat.tabs-theme(m3-theme.$light-theme);
+  @include mat.toolbar-theme(m3-theme.$light-theme);
+  @include mat.tooltip-theme(m3-theme.$light-theme);
+
+  // Set the default font family
+  font-family: 'Roboto', sans-serif;
+}
+
+// Handle buttons appropriately, with respect to line-height
+.mat-raised-button,
+.mat-stroked-button,
+.mat-flat-button {
+  padding: 0 1.15em;
+  margin: 0 0.65em;
+  min-width: 3em;
+  line-height: 36.4px;
+}
+
+.mat-standard-chip {
+  padding: 0.5em 0.85em;
+  min-height: 2.5em;
+}
+
+.material-icons {
+  font-size: 24px;
+  font-family: 'Material Icons', sans-serif;
+  .mat-badge-content {
+    font-family: 'Roboto', sans-serif;
+  }
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field.mat-mdc-form-field .mdc-notched-outline__notch {
+  border-right-style: hidden;
+}
+.mat-mdc-input-element {
+  box-shadow: none !important;
+}
+
+.card {
+  @apply bg-white rounded-xl p-8;
+}

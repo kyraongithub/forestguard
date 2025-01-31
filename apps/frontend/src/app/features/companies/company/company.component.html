@@ -1,0 +1,132 @@
+<!-- 
+ ~ Copyright Fraunhofer Institute for Material Flow and Logistics
+ ~
+ ~ Licensed under the Apache License, Version 2.0 (the "License").
+ ~ For details on the licensing terms, see the LICENSE file.
+ ~ SPDX-License-Identifier: Apache-2.0
+-->
+<h1 class="font-semibold text-gray-700 pb-4">Company</h1>
+
+<div class="card mb-4 flex justify-end">
+  <a [routerLink]="Uris.addUser" mat-button class="text-end">
+    {{ authenticationService.hasRole(Role.COOPERATIVE) ? 'Create Employee/Farmer' : 'Create Employee' }}
+  </a>
+</div>
+
+<div class="grid md:grid-cols-2 sm:grid-cols-1" *ngIf="company$ | async as company">
+  <div class="card grid md:grid-cols-2 md:mr-4 sm:mr-0">
+    <span class="border-b-2 py-2 font-medium">Name</span>
+    <p class="border-b-2 py-2 text-neutral-500">{{ company.name }}</p>
+    <span class="border-b-2 py-2 font-medium">Street</span>
+    <p class="border-b-2 py-2 text-neutral-500">{{ company.address.street }}</p>
+    <span class="py-2 font-medium md:border-none sm:border-b-2">Postal Code</span>
+    <p class="py-2 text-neutral-500">{{ company.address.postalCode }}</p>
+  </div>
+  <div class="card grid md:grid-cols-2 md:mt-0 sm:mt-4">
+    <span class="border-b-2 py-2 font-medium">City</span>
+    <p class="border-b-2 py-2 text-neutral-500">{{ company.address.city }}</p>
+    <span class="border-b-2 font-medium py-2">State</span>
+    <p class="border-b-2 py-2 text-neutral-500">{{ company.address.state }}</p>
+    <span class="border-b-2 py-2 font-medium" [class]="company.address.additionalInformation ? '' : 'md:border-none sm:border-b-2'">
+      Country
+    </span>
+    <p class="py-2 text-neutral-500" [class]="company.address.additionalInformation ? 'border-b-2' : ''">{{ company.address.country }}</p>
+    <span *ngIf="company.address?.additionalInformation" class="font-medium py-2 md:border-none sm:border-b-2">Additional Information</span>
+    <p class="text-neutral-500 py-2">{{ company.address.additionalInformation }}</p>
+  </div>
+</div>
+
+<div class="card mt-4">
+  <h1 class="text-lg font-semibold">Farmers</h1>
+  <div class="flex flex-col lg:flex-row lg:divide-x-2 mt-2 gap-2">
+    <mat-form-field class="w-full" appearance="outline">
+      <mat-label>Filter</mat-label>
+      <input matInput placeholder="Search" (keyup)="applyFilter($event)" />
+    </mat-form-field>
+    <div class="flex flex-col md:flex-row gap-2 lg:pl-2 md:items-center">
+      <button class="w-max" mat-flat-button matTooltip="Import data to add more farmers to the table." (click)="fileInput.click()">
+        Import Data
+      </button>
+      <input type="file" #fileInput class="hidden" (change)="onFileSelected($event)" />
+      <a routerLink="{{ Uris.addUser }}" mat-flat-button class="w-max">Create Employee/Farmer</a>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-4 overflow-x-auto">
+  <table mat-table *ngIf="farmers$ | async as farmers" [dataSource]="farmers" matSort>
+    <!-- Farmer Local ID -->
+    <ng-container matColumnDef="employeeId" class="headline-text">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="employeeId">Local Farmer ID</th>
+      <td mat-cell *matCellDef="let farmer">{{ farmer.employeeId }}</td>
+    </ng-container>
+
+    <!-- Name -->
+    <ng-container matColumnDef="name" class="headline-text">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="name">Name</th>
+      <td mat-cell *matCellDef="let farmer" class="cursor-pointer hover:underline text-secondary-500">
+        <a [routerLink]="['/users', farmer.id]">{{ farmer.firstName }} {{ farmer.lastName }}</a>
+      </td>
+    </ng-container>
+
+    <!-- Email -->
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="email">Email</th>
+      <td mat-cell *matCellDef="let farmer">{{ farmer.email }}</td>
+    </ng-container>
+
+    <!-- Phone Number -->
+    <ng-container matColumnDef="mobilePhoneNumber">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="mobilePhoneNumber">Phone Number</th>
+      <td mat-cell *matCellDef="let farmer">{{ farmer.mobilePhoneNumber }}</td>
+    </ng-container>
+
+    <!-- Street -->
+    <ng-container matColumnDef="street">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="address.street">Street</th>
+      <td mat-cell *matCellDef="let farmer">{{ farmer.address.street }}</td>
+    </ng-container>
+
+    <!-- Postal Code -->
+    <ng-container matColumnDef="postalCode">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="address.postalCode">Postal Code</th>
+      <td mat-cell *matCellDef="let farmer">{{ farmer.address.postalCode }}</td>
+    </ng-container>
+
+    <!-- City -->
+    <ng-container matColumnDef="city">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="address.city">City</th>
+      <td mat-cell *matCellDef="let farmer">{{ farmer.address.city }}</td>
+    </ng-container>
+
+    <!-- State -->
+    <ng-container matColumnDef="state">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="address.state">State</th>
+      <td mat-cell *matCellDef="let farmer">{{ farmer.address.state }}</td>
+    </ng-container>
+
+    <!-- Country -->
+    <ng-container matColumnDef="country">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="address.country">Country</th>
+      <td mat-cell *matCellDef="let farmer">{{ farmer.address.country }}</td>
+    </ng-container>
+
+    <!-- Plots of Land -->
+    <ng-container matColumnDef="plotOfLand">
+      <th mat-header-cell *matHeaderCellDef>Plot of Land</th>
+      <td mat-cell *matCellDef="let farmer">
+        <a
+          *ngFor="let plotsOfLand of farmer.plotsOfLand"
+          [routerLink]="['/pols', plotsOfLand.id]"
+          class="cursor-pointer hover:underline text-secondary-500"
+        >
+          {{ plotsOfLand.description }}
+        </a>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumnsOfBatches"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumnsOfBatches"></tr>
+  </table>
+  <mat-paginator [pageSizeOptions]="[10]" [pageSize]="10"></mat-paginator>
+</div>

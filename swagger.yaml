@@ -1,0 +1,706 @@
+openapi: 3.0.0
+paths:
+  /batches:
+    post:
+      operationId: BatchController_createBatches
+      summary: ''
+      description: Create coffee batches
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        '201':
+          description: Successful creation.
+      tags:
+        - Batches
+      security:
+        - bearer: []
+  /batches/harvests:
+    post:
+      operationId: BatchController_createHarvests
+      summary: ''
+      description: Create harvest batches
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        '201':
+          description: Successful creation.
+      tags:
+        - Batches
+      security:
+        - bearer: []
+  /batches/harvests/combined:
+    post:
+      operationId: BatchController_createCombinedHarvests
+      summary: ''
+      description: Create harvest batches to multiple plot of lands
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchCombinedCreateDto'
+      responses:
+        '201':
+          description: Successful creation.
+      tags:
+        - Batches
+      security:
+        - bearer: []
+  /batches/{id}:
+    get:
+      operationId: BatchController_getBatch
+      summary: ''
+      description: Get coffee batch by ID
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request.
+      tags:
+        - Batches
+      security:
+        - bearer: []
+  /batches/{id}/related:
+    get:
+      operationId: BatchController_getRelatedBatches
+      summary: ''
+      description: Get all coffee batches that are related to the coffee batch
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request.
+      tags:
+        - Batches
+      security:
+        - bearer: []
+  /batches/{id}/export:
+    get:
+      operationId: BatchController_getExportBatch
+      summary: ''
+      description: >-
+        Export batch file with all batch information and all previous and next
+        batches
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request.
+      tags:
+        - Batches
+      security:
+        - bearer: []
+  /companies:
+    post:
+      operationId: CompanyController_createCompany
+      summary: ''
+      description: Create a company
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyCreateDto'
+      responses:
+        '201':
+          description: Successful creation.
+      tags:
+        - Companies
+      security:
+        - bearer: []
+    get:
+      operationId: CompanyController_getCompanies
+      summary: ''
+      description: Get all companies
+      parameters:
+        - name: filters
+          required: false
+          in: query
+          examples:
+            noFilter:
+              value: null
+              description: Apply no filters
+            name:
+              value:
+                name:
+                  contains: foo
+              description: Filter for companies that contain the string "foo"
+          schema:
+            type: string
+        - name: sorting
+          required: false
+          in: query
+          examples:
+            noSorting:
+              value: null
+              description: Apply no specific sorting
+            id:
+              value:
+                id: desc
+              description: Sort by descending company id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request.
+      tags:
+        - Companies
+      security:
+        - bearer: []
+  /companies/{id}:
+    get:
+      operationId: CompanyController_getCompany
+      summary: ''
+      description: Get company by ID
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request.
+      tags:
+        - Companies
+      security:
+        - bearer: []
+  /companies/{id}/batches:
+    get:
+      operationId: CompanyController_getBatches
+      summary: ''
+      description: Get all coffee batches of the company
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: sorting
+          required: false
+          in: query
+          example:
+            processStep:
+              dateOfEntry: desc
+              dateOfProcess: desc
+          schema: {}
+        - name: query
+          required: false
+          in: query
+          example:
+            active: true
+          schema: {}
+      responses:
+        '200':
+          description: Successful request.
+      tags:
+        - Companies
+      security:
+        - bearer: []
+  /companies/{id}/farmers:
+    get:
+      operationId: CompanyController_getFarmers
+      summary: ''
+      description: Get all farmers related to the company
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request.
+      tags:
+        - Companies
+      security:
+        - bearer: []
+  /cultivations:
+    post:
+      operationId: CultivationController_createCultivation
+      summary: ''
+      description: Create a cultivation
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CultivationCreateDto'
+      responses:
+        '201':
+          description: Successful creation.
+      tags:
+        - Cultivations
+      security:
+        - bearer: []
+    get:
+      operationId: CultivationController_getCultivationsByCommodity
+      summary: ''
+      description: Get all cultivations
+      parameters:
+        - name: commodity
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request.
+      tags:
+        - Cultivations
+      security:
+        - bearer: []
+  /cultivations/commodities:
+    get:
+      operationId: CultivationController_getCultivationCommodities
+      summary: ''
+      description: Get all cultivation commodities
+      parameters: []
+      responses:
+        '200':
+          description: Successful request.
+      tags:
+        - Cultivations
+      security:
+        - bearer: []
+  /pols:
+    get:
+      operationId: PlotOfLandController_getPlotsOfLand
+      summary: ''
+      description: Get all plot of lands of a farmer
+      parameters:
+        - name: farmerId
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request.
+      tags:
+        - PlotsOfLand
+      security:
+        - bearer: []
+    post:
+      operationId: PlotOfLandController_createPlotOfLand
+      summary: ''
+      description: Create a plot of land for a farmer
+      parameters:
+        - name: farmerId
+          required: true
+          in: query
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlotOfLandCreateDto'
+      responses:
+        '201':
+          description: Successful creation.
+      tags:
+        - PlotsOfLand
+      security:
+        - bearer: []
+  /pols/{id}:
+    get:
+      operationId: PlotOfLandController_getPlotOfLandById
+      summary: ''
+      description: Get plot of land by ID
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request.
+      tags:
+        - PlotsOfLand
+      security:
+        - bearer: []
+    patch:
+      operationId: PlotOfLandController_createOrUpdatePlotOfLand
+      summary: ''
+      description: Create or update the seeding for a plot of land
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlotOfLandUpdateDto'
+      responses:
+        '200':
+          description: Successful creation.
+      tags:
+        - PlotsOfLand
+      security:
+        - bearer: []
+  /pols/{id}/proofs:
+    post:
+      operationId: PlotOfLandController_postProof
+      summary: ''
+      description: Create a proof for a plot of land
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        description: >-
+          The proof of the given plot of land. Either of type `PROOF_OF_FREEDOM`
+          of `PROOF_OF_OWNERSHIP`.
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProofUploadDto'
+      responses:
+        '201':
+          description: Successful creation.
+      tags:
+        - PlotsOfLand
+      security:
+        - bearer: []
+    get:
+      operationId: PlotOfLandController_getProofsByPlotOfLandId
+      summary: ''
+      description: Get all proofs of a plot of land
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request.
+      tags:
+        - PlotsOfLand
+      security:
+        - bearer: []
+  /users:
+    get:
+      operationId: UserController_getUsers
+      summary: ''
+      description: Get all users
+      parameters: []
+      responses:
+        '200':
+          description: Successful request.
+      tags:
+        - Users
+      security:
+        - bearer: []
+    post:
+      operationId: UserController_createUser
+      summary: ''
+      description: Create a user object
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateDto'
+      responses:
+        '200':
+          description: Successful creation.
+      tags:
+        - Users
+      security:
+        - bearer: []
+  /users/{id}:
+    patch:
+      operationId: UserController_updateUser
+      summary: ''
+      description: Update an user
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateDto'
+      responses:
+        '200':
+          description: Successful update.
+      tags:
+        - Users
+      security:
+        - bearer: []
+    get:
+      operationId: UserController_getUser
+      summary: ''
+      description: Get user by ID
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request.
+      tags:
+        - Users
+      security:
+        - bearer: []
+  /users/farmers:
+    post:
+      operationId: UserController_createFarmer
+      summary: ''
+      description: Create a farmer
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FarmerCreateDto'
+      responses:
+        '201':
+          description: Successful creation.
+      tags:
+        - Users
+      security:
+        - bearer: []
+  /users/{id}/docs:
+    post:
+      operationId: UserController_addDocToFarmer
+      summary: ''
+      description: Create a document for a farmer
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: The id of the farmer
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  description: The description of the document
+                file:
+                  type: string
+                  format: binary
+                  description: The document to upload
+      responses:
+        '201':
+          description: ''
+      tags:
+        - Users
+      security:
+        - bearer: []
+  /users/{id}/docs/{docRef}:
+    patch:
+      operationId: UserController_updateFarmerDoc
+      summary: ''
+      description: Create a document for a farmer
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: The id of the farmer
+          schema:
+            type: string
+        - name: docRef
+          required: true
+          in: path
+          description: The reference of the document
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  description: The description of the document
+                file:
+                  type: string
+                  format: binary
+                  description: The document to upload
+      responses:
+        '200':
+          description: ''
+      tags:
+        - Users
+      security:
+        - bearer: []
+    delete:
+      operationId: UserController_deleteFarmerDoc
+      summary: ''
+      description: Delete a farmer document
+      parameters:
+        - name: docRef
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+      tags:
+        - Users
+      security:
+        - bearer: []
+  /process-steps/{id}/docs:
+    post:
+      operationId: ProcessStepController_addDocToProcessStep
+      summary: ''
+      description: Create a document for process steps
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: The id of the process step
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  description: The description of the document
+                file:
+                  type: string
+                  format: binary
+                  description: The document to upload
+      responses:
+        '201':
+          description: ''
+      tags:
+        - Process Steps
+      security:
+        - bearer: []
+  /import:
+    post:
+      operationId: ImportController_importMasterData
+      summary: ''
+      description: Import master data from an excel file
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The file with master data
+      responses:
+        '201':
+          description: ''
+      tags:
+        - Import
+      security:
+        - bearer: []
+info:
+  title: ForestGuard API
+  description: ''
+  version: '0.1'
+  contact: {}
+tags: []
+servers: []
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+  schemas:
+    BatchCombinedCreateDto:
+      type: object
+      properties: {}
+    CompanyCreateDto:
+      type: object
+      properties: {}
+    CultivationCreateDto:
+      type: object
+      properties: {}
+    PlotOfLandCreateDto:
+      type: object
+      properties: {}
+    PlotOfLandUpdateDto:
+      type: object
+      properties: {}
+    ProofUploadDto:
+      type: object
+      properties:
+        type:
+          type: object
+        file:
+          type: string
+          format: binary
+      required:
+        - type
+        - file
+    UserCreateDto:
+      type: object
+      properties: {}
+    UserUpdateDto:
+      type: object
+      properties: {}
+    FarmerCreateDto:
+      type: object
+      properties: {}

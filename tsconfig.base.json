@@ -1,0 +1,32 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["es2020", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@forest-guard/amqp": ["libs/amqp/src/index.ts"],
+      "@forest-guard/api-interfaces": ["libs/api-interfaces/src/index.ts"],
+      "@forest-guard/blockchain-connector": ["libs/blockchain-connector/src/index.ts"],
+      "@forest-guard/configuration": ["libs/configuration/src/index.ts"],
+      "@forest-guard/database": ["libs/database/src/index.ts"],
+      "@forest-guard/file-storage": ["libs/file-storage/src/index.ts"],
+      "@forest-guard/ubiriki-import": ["libs/ubiriki-import/src/index.ts"],
+      "@forest-guard/ui": ["libs/ui/src/index.ts"],
+      "@forest-guard/ui-graph": ["libs/ui-graph/src/index.ts"],
+      "@forest-guard/util": ["libs/util/src/index.ts"],
+      "@forest-guard/utm": ["libs/utm-wgs/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

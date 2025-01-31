@@ -1,0 +1,130 @@
+api:run-unit-tests:
+  needs: []
+  stage: test
+  extends: .default
+  script:
+    - npx nx test api
+  artifacts:
+    paths:
+      - ./apps/api/coverage
+    expire_in: 1 week
+  only:
+    - merge_requests
+    - main
+
+api:run-integration-tests:
+  needs: []
+  stage: test
+  extends: .default
+  services:
+    - name: postgres:16.1
+      alias: postgres
+    - name: rabbitmq:3-alpine
+      alias: rabbitmq
+    - name: quay.io/keycloak/keycloak:26.0
+      alias: keycloak
+      command:
+        - start-dev
+  variables:
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    POSTGRES_DB: forest_guard
+    DATABASE_URL: postgresql://postgres:postgres@postgres:5432/forest_guard?schema=public
+    AMQP_URI: amqp://rabbitmq:5672
+    KC_BOOTSTRAP_ADMIN_USERNAME: admin
+    KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    KEYCLOAK_URL: http://keycloak:8080
+    KEYCLOAK_REALM_CONFIG_PATH: ./keycloak/realm/ForestGuard-realm.json
+    KC_LOG_LEVEL: DEBUG
+    KC_HTTP_ENABLED: true
+    BLOCKCHAIN_ENABLED: false
+  script:
+    - apk add --no-cache wget ca-certificates curl jq
+    - wget https://github.com/jwilder/dockerize/releases/download/v0.8.0/dockerize-alpine-linux-amd64-v0.8.0.tar.gz
+    - tar -C /usr/local/bin -xzvf dockerize-alpine-linux-amd64-v0.8.0.tar.gz
+    - dockerize -wait tcp://postgres:5432 -wait tcp://rabbitmq:5672 -timeout 60s
+    - |
+      echo "Fetching admin JWT from Keycloak..."
+      export TOKEN_RESPONSE=$(curl --request POST --url ${KEYCLOAK_URL}/realms/master/protocol/openid-connect/token --header 'Accept: application/x-www-form-urlencoded' --header 'Content-Type: application/x-www-form-urlencoded' --data grant_type=password --data client_id=admin-cli --data username=${KC_BOOTSTRAP_ADMIN_USERNAME} --data password=${KC_BOOTSTRAP_ADMIN_PASSWORD})
+      export ADMIN_ACCESS_TOKEN=$(echo $TOKEN_RESPONSE | jq -r .access_token)
+      echo "Importing ForestGuard Keycloak realm configuration..."
+      curl --request POST --url ${KEYCLOAK_URL}/admin/realms --header "Accept: application/x-www-form-urlencoded" --header "Authorization: Bearer ${ADMIN_ACCESS_TOKEN}" --header "Content-Type: application/json" --data-binary @${KEYCLOAK_REALM_CONFIG_PATH}
+    - npx nx serve api &
+    - npx nx serve entity-management-svc &
+    - npx nx serve process-svc &
+    - npx nx test api-e2e --skip-nx-cache --runInBand
+  only:
+    - merge_requests
+    - main
+
+api:sonarqube-check-mr:
+  needs:
+    - api:run-unit-tests
+    #- api:run-integration-tests
+  stage: analysis
+  image:
+    name: sonarsource/sonar-scanner-cli:5.0
+    entrypoint: ['']
+  variables:
+    SONAR_USER_HOME: '/apps/api/.sonar' # Defines the location of the analysis task cache
+    GIT_DEPTH: '0' # Tells git to fetch all the branches of the project, required by the analysis task
+  cache:
+    key: '${CI_JOB_NAME}'
+    paths:
+      - /apps/api/.sonar/cache
+  script:
+    - >
+      sonar-scanner
+      -Dsonar.projectBaseDir=./apps/api/
+      -Dsonar.pullrequest.key=${CI_MERGE_REQUEST_IID}
+      -Dsonar.pullrequest.branch=${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}
+      -Dsonar.pullrequest.base=${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}
+  allow_failure: true
+  only:
+    - merge_requests
+
+api:sonarqube-check-main:
+  needs:
+    - api:run-unit-tests
+    #- api:run-integration-tests
+  stage: analysis
+  image:
+    name: sonarsource/sonar-scanner-cli:5.0
+    entrypoint: ['']
+  variables:
+    SONAR_USER_HOME: '/apps/api/.sonar' # Defines the location of the analysis task cache
+    GIT_DEPTH: '0' # Tells git to fetch all the branches of the project, required by the analysis task
+  cache:
+    key: '${CI_JOB_NAME}'
+    paths:
+      - /apps/api/.sonar/cache
+  script:
+    - sonar-scanner -Dsonar.projectBaseDir=./apps/api/
+  allow_failure: true
+  only:
+    - main
+
+api:build:
+  stage: build
+  extends: .default
+  script:
+    - npm ci --cache .npm --prefer-offline
+    - npx nx build api
+  artifacts:
+    paths:
+      - dist/apps/api
+  only:
+    - main
+
+api:archive:
+  stage: archive
+  image: docker
+  services:
+    - docker:dind
+  before_script:
+    - echo "$HARBOR_TOKEN" | docker login $CRI_URL -u $HARBOR_USER --password-stdin
+  script:
+    - docker build --pull --cache-from ${CRI_PATH}/api -t ${CRI_PATH}/api:$CI_COMMIT_SHA --build-arg APP=api -f docker/nest.dockerfile  .
+    - docker push ${CRI_PATH}/api:$CI_COMMIT_SHA
+  only:
+    - main

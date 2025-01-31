@@ -1,0 +1,127 @@
+<!-- 
+ ~ Copyright Fraunhofer Institute for Material Flow and Logistics
+ ~
+ ~ Licensed under the Apache License, Version 2.0 (the "License").
+ ~ For details on the licensing terms, see the LICENSE file.
+ ~ SPDX-License-Identifier: Apache-2.0
+-->
+<header class="font-semibold pb-4 flex flex-row gap-2 text-neutral-300 items-center">
+  <h1 class="font-medium">Add Plot of Land</h1>
+</header>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <form [formGroup]="plotOfLandFormGroup">
+    <div class="card">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Process Owner</mat-label>
+        <input placeholder="Process Owner" matInput formControlName="processOwner" [matAutocomplete]="processOwnerAuto" />
+        <mat-autocomplete #processOwnerAuto="matAutocomplete" [displayWith]="getFormattedUserName">
+          <mat-option *ngFor="let farmer of farmers$ | async" [value]="farmer">
+            {{ getFormattedUserName(farmer) }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>Region</mat-label>
+        <input matInput formControlName="region" placeholder="Region" />
+      </mat-form-field>
+
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>Description</mat-label>
+        <input matInput formControlName="plotOfLand" placeholder="Plot Of Land" />
+      </mat-form-field>
+
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>Sort Of Coffee</mat-label>
+        <input placeholder="Sort Of Coffee" matInput formControlName="cultivationSort" [matAutocomplete]="cultivationSortAuto" />
+        <mat-autocomplete #cultivationSortAuto="matAutocomplete">
+          <mat-option *ngFor="let option of coffeeOptions$ | async" [value]="option">
+            {{ option }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>Quality</mat-label>
+        <input placeholder="Quality" matInput formControlName="cultivationQuality" [matAutocomplete]="cultivationQualityAuto" />
+        <mat-autocomplete #cultivationQualityAuto="matAutocomplete">
+          <mat-option *ngFor="let option of qualityOptions$ | async" [value]="option">
+            {{ option }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <div class="flex">
+        <mat-form-field class="w-full mr-4" appearance="outline">
+          <mat-label>Local Plot of Land ID</mat-label>
+          <input matInput formControlName="localPlotOfLandId" placeholder="Local Plot of Land ID" />
+        </mat-form-field>
+
+        <mat-form-field class="w-full" appearance="outline">
+          <mat-label>National Plot of Land ID</mat-label>
+          <input matInput formControlName="nationalPlotOfLandId" placeholder="National Plot of Land ID" />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="card mt-4">
+      <div class="grid grid-cols-2 items-center mb-2 gap-10">
+        <h1 class="font-semibold text-gray-700">Geo Data</h1>
+
+        <div class="inline-flex justify-end gap-4 w-full">
+          <button mat-button (click)="toggleImportGeoData()"><div class="text-nowrap">JSON Import</div></button>
+          <button mat-flat-button (click)="sheet.open()" [ngClass]="{ '!bg-red-500': !geoDataFormGroup.valid }">
+            <div class="text-nowrap">Manual Input</div>
+          </button>
+        </div>
+
+        @if (geoDataFormGroup.invalid) {
+          <div class="text-red-500 col-span-2">No Geo informations provided or geo data invalid.</div>
+        }
+
+        @if (geoDataFormGroup.valid) {
+          <div class="col-span-2">
+            <div class="h-80 z-0" leaflet id="map" [leafletCenter]="center" [leafletZoom]="10" [leafletLayers]="layers"></div>
+          </div>
+        }
+      </div>
+
+      <form *ngIf="isImportGeoDataVisible" class="space-y-4 p-4 bg-gray-100 rounded-lg" [formGroup]="geoDataFormGroup">
+        <textarea
+          formControlName="geoDataInput"
+          placeholder="Please enter the Geo Data as a JSON file here."
+          class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-700"
+        ></textarea>
+
+        <div class="inline-flex justify-end gap-4 w-full">
+          <button mat-button (click)="toggleImportGeoData()">Back</button>
+          <button mat-flat-button (click)="saveGeoData()">Save</button>
+        </div>
+      </form>
+    </div>
+  </form>
+
+  <app-upload-form
+    [selectOptions]="uploadSelectOption"
+    [title]="'Upload Proofs'"
+    [informationText]="
+      'Upload Proof of freedom from deforestation or Proof of ownership for a Plot of Land here. This step is optional, documents can also be added later.'
+    "
+    (uploadDocument)="submitFile($event)"
+    (removeProof)="removeFile($event)"
+  ></app-upload-form>
+</div>
+<div class="card mt-4">
+  <div class="inline-flex justify-end gap-4 w-full">
+    <button mat-button (click)="clearInputFields()">Clear</button>
+    <button mat-flat-button (click)="submitPlotOfLand()">Save</button>
+  </div>
+</div>
+
+<app-sheet #sheet>
+  <div>
+    <button class="material-symbols-outlined cursor-pointer" (click)="sheet.close()">close</button>
+    <h2 class="font-medium text-sm mb-4">Add Geo Information about the field</h2>
+  </div>
+  <app-coordinate-input [geoDataFormGroup]="geoDataFormGroup" (save)="sheet.close()" />
+</app-sheet>

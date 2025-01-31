@@ -1,0 +1,65 @@
+[
+  {
+    "id": "acme_corp_address",
+    "street": "123 Main St",
+    "city": "Springfield",
+    "state": "IL",
+    "postalCode": "62704",
+    "country": "USA",
+    "additionalInformation": "good to know"
+  },
+  {
+    "id": "some_address",
+    "street": "456 Elm St",
+    "city": "Shelbyville",
+    "state": "IN",
+    "postalCode": "46176",
+    "country": "USA",
+    "additionalInformation": "good to know"
+  },
+  {
+    "id": "cooperative_address",
+    "street": "Carretera Marginal Km. 61",
+    "city": "Pichanaki",
+    "state": "Junín",
+    "postalCode": "1337",
+    "country": "Peru",
+    "additionalInformation": "Telefon: +51 064 384309"
+  },
+  {
+    "id": "exporter_address",
+    "street": "308-6941 Consectetuer St.",
+    "city": "Omaha",
+    "state": "NE",
+    "postalCode": "8119",
+    "country": "USA",
+    "additionalInformation": "good to know"
+  },
+  {
+    "id": "importer_address",
+    "street": "2772 Sed St.",
+    "city": "Waterbury",
+    "state": "CT",
+    "postalCode": "99776",
+    "country": "USA",
+    "additionalInformation": "good to know"
+  },
+  {
+    "id": "roaster_address",
+    "street": "406-4669 Hymenaeos. Rd.",
+    "city": "Columbus",
+    "state": "OH",
+    "postalCode": "80291",
+    "country": "USA",
+    "additionalInformation": "good to know"
+  },
+  {
+    "id": "trader_address",
+    "street": "470-935 Nisi Av.",
+    "city": "Carson City",
+    "state": "NV",
+    "postalCode": "48376",
+    "country": "USA",
+    "additionalInformation": "good to know"
+  }
+]

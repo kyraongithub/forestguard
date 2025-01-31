@@ -1,0 +1,181 @@
+<!-- 
+ ~ Copyright Fraunhofer Institute for Material Flow and Logistics
+ ~
+ ~ Licensed under the Apache License, Version 2.0 (the "License").
+ ~ For details on the licensing terms, see the LICENSE file.
+ ~ SPDX-License-Identifier: Apache-2.0
+-->
+<header class="font-semibold pb-4 flex flex-row gap-2 text-neutral-300 items-center">
+  <a routerLink="/batches" class="font-semibold text-gray-700 hover:underline">Batches</a>
+  <span class="material-symbols-outlined text-lg"> chevron_right </span>
+  <h1 class="font-medium">{{ id$ | async }}</h1>
+  <div class="ml-auto flex" *ngIf="batch$ | async as batch">
+    <button
+      class="rounded-full bg-secondary-800 px-4 py-2 mb-4 mr-4"
+      (click)="exportBatchInformationAsJson(batch.id)"
+      matTooltip="Download a detailed report on the selected coffee batch and its history (predecessor and successor)."
+    >
+      Download Report
+    </button>
+    <p [ngClass]="batch.active ? 'bg-green-600' : 'bg-gray-500'" class="text-white rounded-full px-4 py-2 mb-4">
+      Status: {{ isBatchActive(batch.active) }}
+    </p>
+  </div>
+</header>
+
+<div *ngIf="batch$ | async as batch">
+  <div class="card">
+    <div class="flex flex-row items-center justify-between">
+      <div>
+        <span class="text-neutral-500 text-sm">{{ batch.processStep.process.name }}</span>
+        <h2 class="text-lg font-medium text-neutral-400">Batch {{ batch.id }}</h2>
+        <span class="text-neutral-500 text-sm">Weight [kg] {{ batch.weight }}</span>
+      </div>
+      <div class="grid grid-cols-2 space-x-4 text-neutral-500">
+        <p class="text-right font-medium">Date of Process</p>
+        <p>{{ batch.processStep.dateOfProcess | date }}</p>
+        <p class="text-right font-medium">Date of Entry</p>
+        <p>{{ batch.processStep.dateOfEntry | date }}</p>
+        <p class="text-right font-medium">Process Owner</p>
+        <a class="cursor-pointer hover:underline text-secondary-500" [routerLink]="[Uris.users, batch.processStep.executedBy.id]">
+          {{ getUserOrCompanyName(batch.processStep.executedBy) }}
+        </a>
+        <p class="text-right font-medium">Location</p>
+        @if (batch.processStep.farmedLand) {
+          <a
+            class="cursor-pointer text-neutral-500 hover:underline hover:text-secondary-500"
+            [routerLink]="['/pols', batch.processStep.farmedLand.id]"
+          >
+            {{ batch.processStep.farmedLand.description }}
+          </a>
+        } @else {
+          <p>{{ batch.processStep.location }}</p>
+        }
+        <p class="text-right font-medium">Recipient</p>
+        <a class="cursor-pointer hover:underline text-secondary-500" [routerLink]="[Uris.companies, batch.recipient.id]">
+          {{ getUserOrCompanyName(batch.recipient) }}
+        </a>
+        <p class="text-right font-medium">Author of Entry</p>
+        <p>{{ getUserOrCompanyName(batch.processStep.recordedBy) }}</p>
+        <p class="text-right font-medium">EU System Info ID</p>
+        <p>{{ batch.euInfoSystemId ?? 'Not provided' }}</p>
+        <p class="text-right font-medium">HS Code</p>
+        <p>{{ batch.hsCode ?? 'Not provided' }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4" *ngIf="batch.processStep.farmedLand">
+    <div class="card text-neutral-300">
+      <h1 class="text-lg font-semibold">{{ batch.processStep.process.name }} Details</h1>
+      <div class="mt-8 grid grid-cols-1 md:grid-cols-2">
+        <span class="border-b-2 py-2 font-medium">Plot of Land</span>
+        <a
+          class="border-b-2 py-2 cursor-pointer text-neutral-500 hover:underline hover:text-secondary-500"
+          [routerLink]="['/pols', batch.processStep.farmedLand.id]"
+        >
+          {{ batch.processStep.farmedLand.description }}
+        </a>
+        <span class="py-2 font-medium">Sort of Coffee</span>
+        <p class="py-2 text-neutral-500">{{ batch.processStep.farmedLand.cultivatedWith?.sort }}</p>
+      </div>
+    </div>
+    <div class="card text-neutral-300">
+      <h1 class="text-lg font-semibold">PDF Documents</h1>
+      <div class="h-full flex items-center justify-start w-full">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center w-full justify-center">
+          <div>Proof of Freedom from deforestation</div>
+          <div
+            class="space-x-4 flex flex-row select-none w-full justify-end"
+            *ngIf="getProof(ProofType.PROOF_OF_FREEDOM, batch.processStep.farmedLand?.proofs) as proof; else notUploaded"
+          >
+            <div class="p-1 h-10 w-10 rounded-full bg-green-600 flex items-center justify-center">
+              <span class="material-symbols-outlined text-white"> done </span>
+            </div>
+            <div class="p-1 h-10 w-10 rounded-full hover:bg-gray-200 flex items-center justify-center cursor-pointer">
+              <a class="material-symbols-outlined" [href]="MINIO_URL + proof.documentRef"> file_download </a>
+            </div>
+          </div>
+          <ng-template #notUploaded>
+            <div class="space-x-4 flex flex-row select-none w-full justify-end">
+              <div class="p-1 h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center">
+                <span class="material-symbols-outlined text-white"> warning </span>
+              </div>
+              <div class="p-1 h-10 w-10 rounded-full hover:bg-gray-200 flex items-center justify-center cursor-not-allowed">
+                <span class="material-symbols-outlined text-gray-300"> file_download </span>
+              </div>
+            </div>
+          </ng-template>
+
+          <div>Proof of Ownership for plot of land</div>
+          <div
+            class="space-x-4 flex flex-row select-none w-full justify-end"
+            *ngIf="getProof(ProofType.PROOF_OF_OWNERSHIP, batch.processStep.farmedLand?.proofs) as proof; else notUploaded"
+          >
+            <div class="p-1 h-10 w-10 rounded-full bg-green-600 flex items-center justify-center">
+              <span class="material-symbols-outlined text-white"> done </span>
+            </div>
+            <div class="p-1 h-10 w-10 rounded-full hover:bg-gray-200 flex items-center justify-center cursor-pointer">
+              <a class="material-symbols-outlined" [href]="MINIO_URL + proof.documentRef"> file_download </a>
+            </div>
+          </div>
+          <ng-template #notUploaded>
+            <div class="space-x-4 flex flex-row select-none w-full justify-end">
+              <div class="p-1 h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center">
+                <span class="material-symbols-outlined text-white"> warning </span>
+              </div>
+              <div class="p-1 h-10 w-10 rounded-full hover:bg-gray-200 flex items-center justify-center cursor-not-allowed">
+                <span class="material-symbols-outlined text-gray-300"> file_download </span>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4" *ngIf="batch.processStep.documents?.length">
+    <div class="card text-neutral-300">
+      <h1 class="text-lg font-semibold mb-2">Documents</h1>
+      <div *ngFor="let document of batch.processStep.documents">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center w-full justify-center border-b-2">
+          <div class="font-medium">
+            {{ document.description.length > 0 ? document.description : 'No custom description provided.' }}
+          </div>
+          <div class="space-x-4 flex flex-row select-none w-full justify-end">
+            <div class="p-1 h-10 w-10 rounded-full hover:bg-gray-200 flex items-center justify-center space-x-4 flex-row select-none">
+              <a
+                [href]="MINIO_URL + document.documentRef"
+                target="_blank"
+                class="p-1 material-symbols-outlined hover:bg-gray-200 rounded-full cursor-pointer"
+                matTooltip="Download document"
+              >
+                <span class="material-symbols-outlined"> download </span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-4">
+    <h1 class="text-lg font-semibold">Dependency Graph</h1>
+    <lib-ui-graph
+      #dependencyGraph
+      [data]="data$ | async"
+      [width]="innerWidth - 450"
+      (nodeClick)="routeToNode($event)"
+      [selectedNode]="batch.id"
+      [invalidEdges]="invalidEdges$ | async"
+      [nodesWithEUInfoSystemId]="nodesWithEuInfoSystemId$ | async"
+      [nodesWithProcessDocuments]="nodesWithProcessDocuments$ | async"
+    />
+  </div>
+  <div class="card mt-4">
+    <div class="inline-flex justify-end gap-4 w-full">
+      <button mat-button (click)="focusOnCurrentBatch()">Focus Current Batch</button>
+      <button mat-button (click)="centerDependencyGraph()">Center Graph</button>
+      <button mat-flat-button (click)="downloadGraph(batch.id)">Download Graph</button>
+    </div>
+  </div>
+</div>

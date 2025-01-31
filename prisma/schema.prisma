@@ -1,0 +1,195 @@
+// Copyright Fraunhofer Institute for Material Flow and Logistics
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// For details on the licensing terms, see the LICENSE file.
+// SPDX-License-Identifier: Apache-2.0
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  FARMER
+  EMPLOYEE
+}
+
+enum ProofType {
+  PROOF_OF_FREEDOM
+  PROOF_OF_OWNERSHIP
+}
+
+model Address {
+  id                    String @id @default(cuid())
+  street                String
+  city                  String
+  state                 String
+  postalCode            String
+  country               String
+  additionalInformation String
+
+  companies Company[]
+  users     User[]
+}
+
+model Entity {
+  id      String   @id @default(cuid())
+  company Company?
+
+  user User?
+
+  executedProcessSteps ProcessStep[] @relation("executedByEntity")
+  recordedProcessSteps ProcessStep[] @relation("recordedByEntity")
+
+  batches Batch[]
+}
+
+model Company {
+  id   String @id @default(cuid())
+  name String @unique
+
+  entity   Entity @relation(fields: [entityId], references: [id])
+  entityId String @unique
+
+  address   Address? @relation(fields: [addressId], references: [id])
+  addressId String   @map("address_id")
+
+  users User[]
+}
+
+model User {
+  id                String @id @default(cuid())
+  firstName         String
+  lastName          String
+  email             String
+  mobilePhoneNumber String
+  role              Role
+
+  entity   Entity @relation(fields: [entityId], references: [id])
+  entityId String @unique
+
+  company   Company? @relation(fields: [companyId], references: [id])
+  companyId String?
+
+  employeeId String?
+
+  // Columns for role FARMER
+  address   Address? @relation(fields: [addressId], references: [id])
+  addressId String?
+
+  personalId String?
+
+  plotsOfLand PlotOfLand[]
+
+  documents Document[]
+
+  @@unique([companyId, personalId])
+  @@unique([companyId, employeeId])
+}
+
+model PlotOfLand {
+  id                   String @id @default(cuid())
+  country              String
+  region               String
+  province             String
+  district             String
+  nationalPlotOfLandId String
+  localPlotOfLandId    String
+  description          String
+  geoData              String
+  areaInHA             Int
+
+  cultivatedWith Cultivation @relation(fields: [cultivationId], references: [id])
+  cultivationId  String
+
+  proofs Proof[]
+
+  farmer   User?   @relation(fields: [farmerId], references: [id])
+  farmerId String?
+
+  farmedBy ProcessStep[]
+}
+
+model Cultivation {
+  id        String @id @default(cuid())
+  commodity String
+  sort      String
+  quality   String
+
+  plotsOfLand PlotOfLand[]
+
+  @@unique([commodity, sort, quality])
+}
+
+model Proof {
+  documentId  String    @id @default(cuid())
+  type        ProofType
+  documentRef String
+  notice      String?
+
+  plotOfLand   PlotOfLand @relation(fields: [plotOfLandId], references: [id])
+  plotOfLandId String
+}
+
+model Process {
+  id   String @id @default(cuid())
+  name String @unique
+
+  processSteps ProcessStep[]
+}
+
+model ProcessStep {
+  id            String   @id @default(cuid())
+  location      String
+  dateOfProcess DateTime @default(now())
+  dateOfEntry   DateTime @default(now())
+
+  documents Document[]
+
+  process   Process @relation(fields: [processId], references: [id])
+  processId String
+
+  farmedLand   PlotOfLand? @relation(fields: [farmedLandId], references: [id])
+  farmedLandId String?
+
+  executedBy         Entity @relation("executedByEntity", fields: [executedByEntityId], references: [id])
+  executedByEntityId String
+
+  recordedBy         Entity @relation("recordedByEntity", fields: [recordedByEntityId], references: [id])
+  recordedByEntityId String
+
+  batches Batch[]
+}
+
+model Batch {
+  id             String  @id @default(cuid())
+  euInfoSystemId String?
+  hsCode         String?
+  weight         Float
+  active         Boolean
+
+  ins  Batch[] @relation("BatchRelation")
+  outs Batch[] @relation("BatchRelation")
+
+  recipient   Entity @relation(fields: [recipientId], references: [id])
+  recipientId String
+
+  processStep   ProcessStep @relation(fields: [processStepId], references: [id])
+  processStepId String
+}
+
+model Document {
+  id          String @id @default(cuid())
+  description String
+  documentRef String @unique
+
+  processStep   ProcessStep? @relation(fields: [processStepId], references: [id])
+  processStepId String?
+
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String?
+}

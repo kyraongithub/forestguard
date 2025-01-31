@@ -1,0 +1,56 @@
+{
+  "name": "entity-management-svc",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/entity-management-svc/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "entity-management-svc:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "entity-management-svc:build:development"
+        },
+        "production": {
+          "buildTarget": "entity-management-svc:build:production"
+        }
+      }
+    },
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/entity-management-svc",
+        "main": "apps/entity-management-svc/src/main.ts",
+        "tsConfig": "apps/entity-management-svc/tsconfig.app.json",
+        "webpackConfig": "apps/entity-management-svc/webpack.config.js",
+        "assets": []
+      },
+      "configurations": {
+        "development": {},
+        "production": {
+          "generatePackageJson": true
+        }
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "options": {
+        "jestConfig": "apps/entity-management-svc/jest.config.ts",
+        "codeCoverage": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true
+        }
+      }
+    }
+  }
+}
