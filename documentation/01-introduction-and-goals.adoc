@@ -16,7 +16,7 @@ The source code of the ForestGuard software is openly accessible so that solutio
 The solution approach is not limited to the coffee supply chain considered here as an example. Thanks to the open-source publication, ForestGuard is also available for other use cases beyond the EUDR where a reliable information base and verification management is required. +
 Among other things, the solution includes functionalities for
 
-- Master and process data collection from all relevant stakeholders
+- Master and process data collection from all relevant stakeholders (geodata, recording of harvests, splitting and merging of batches, processing steps, transfer, etc.)
 - Verification management (freedom from deforestation, proof of ownership, certificates, etc.)
 - Tracking and visualization
 - Data export function
